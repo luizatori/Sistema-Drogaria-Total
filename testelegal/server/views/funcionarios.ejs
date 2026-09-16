@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciamento de Funcionários</title>
+  <link rel="stylesheet" href="/assets/css/funcionarios.css">
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/img/logobranca.png" alt="Logo Drogaria Total">
+    </div>
+    <ul>
+      <li><a href="/dashboard">Dashboard</a></li>
+      <li><a href="/clientes">Clientes</a></li>
+      <li><a href="/estoque">Estoque</a></li>
+      <li><a href="/vendas">Vendas</a></li>
+      <% if (usuario && usuario.tipo === 'admin') { %>
+        <li><a href="/funcionarios">Gerenciar Funcionários</a></li>
+      <% } %>
+      <li><a href="#" id="btn-sair">Sair</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTEUDO PRINCIPAL -->
+  <main class="main-content">
+    <h2>Gerenciamento de Funcionários</h2>
+
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Tipo</th>
+          <th>Criado em</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% usuarios.forEach(u => { %>
+        <tr>
+          <td><%= u.id %></td>
+          <td><%= u.nome %></td>
+          <td><%= u.tipo %></td>
+          <td><%= new Date(u.criado_em).toLocaleString() %></td>
+          <td>
+            <form action="/funcionarios/editar/<%= u.id %>" method="POST" style="display:inline;" class="form-editar">
+              <input type="text" name="nome" value="<%= u.nome %>" required>
+              <select name="tipo">
+                <option value="funcionario" <%= u.tipo === 'funcionario' ? 'selected' : '' %>>Funcionário</option>
+                <option value="admin" <%= u.tipo === 'admin' ? 'selected' : '' %>>Administrador</option>
+              </select>
+              <button type="submit" class="btn-edit" data-nome="<%= u.nome %>">Salvar</button>
+            </form>
+            <button class="btn-delete" data-id="<%= u.id %>" data-nome="<%= u.nome %>">Excluir</button>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <br>
+    <h2>Histórico de Ações</h2>
+
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuário</th>
+          <th>Ação</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% logs.forEach(log => { %>
+        <tr>
+          <td><%= log.id %></td>
+          <td><%= log.usuario %></td>
+          <td><%= log.acao %></td>
+          <td><%= new Date(log.data).toLocaleString() %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </main>
+
+  <!-- MODAL DE CONFIRMACAO -->
+  <div class="confirm-modal" id="confirmDeleteModal">
+    <div class="modal-content">
+      <h3>Deseja realmente excluir este usuário?</h3>
+      <div class="modal-buttons">
+        <form id="deleteForm" method="POST">
+          <button type="submit" class="btn-confirm">Excluir</button>
+          <button type="button" class="btn-cancel" id="cancelDeleteBtn">Cancelar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ERRO (NUNO - EXCLUSAO) -->
+  <div class="confirm-modal" id="nunoErrorModal" style="display:none;">
+    <div class="modal-content">
+      <h3>O admin-mor "nuno" não pode ser deletado.</h3>
+      <div class="modal-buttons">
+        <button type="button" class="btn-cancel" id="closeNunoModal">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ERRO (NUNO - EDICAO) -->
+  <div class="confirm-modal" id="nunoEditErrorModal" style="display:none;">
+    <div class="modal-content">
+      <h3>O admin-mor "nuno" não pode ser editado.</h3>
+      <div class="modal-buttons">
+        <button type="button" class="btn-cancel" id="closeNunoEditModal">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('confirmDeleteModal');
+    const cancelBtn = document.getElementById('cancelDeleteBtn');
+    const deleteForm = document.getElementById('deleteForm');
+
+    const nunoModal = document.getElementById('nunoErrorModal');
+    const closeNunoModal = document.getElementById('closeNunoModal');
+
+    const nunoEditModal = document.getElementById('nunoEditErrorModal');
+    const closeNunoEditModal = document.getElementById('closeNunoEditModal');
+
+    // BOTAO DE DELETAR
+    document.querySelectorAll('.btn-delete').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nome = button.getAttribute('data-nome');
+        const id = button.getAttribute('data-id');
+
+        // bloqueia delecao do nuno
+        if (nome.toLowerCase() === 'nuno') {
+          nunoModal.style.display = 'flex';
+          return;
+        }
+
+        deleteForm.action = `/funcionarios/deletar/${id}`;
+        modal.style.display = 'flex';
+      });
+    });
+
+    // BOTAO DE EDITAR — bloqueia edicao do nuno
+    document.querySelectorAll('.form-editar').forEach(form => {
+      form.addEventListener('submit', (e) => {
+        const nome = form.querySelector('input[name="nome"]').value.trim().toLowerCase();
+        if (nome === 'nuno') {
+          e.preventDefault();
+          nunoEditModal.style.display = 'flex';
+          return false;
+        }
+      });
+    });
+
+    // FECHAR MODAIS
+    cancelBtn.addEventListener('click', () => modal.style.display = 'none');
+    closeNunoModal.addEventListener('click', () => nunoModal.style.display = 'none');
+    closeNunoEditModal.addEventListener('click', () => nunoEditModal.style.display = 'none');
+
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+      if (e.target === nunoModal) nunoModal.style.display = 'none';
+      if (e.target === nunoEditModal) nunoEditModal.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

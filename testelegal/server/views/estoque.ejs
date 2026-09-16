@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Estoque - Drogaria Total</title>
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/img/logobranca.png" alt="Logo Drogaria Total">
+    </div>
+    <nav>
+      <ul>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/clientes">Clientes</a></li>
+        <li><a href="/estoque" class="active">Estoque</a></li>
+          <% if (usuario && usuario.tipo === 'admin') { %>
+    
+        <li><a href="/vendas">Vendas</a></li>
+        <li><a href="/funcionarios">Gerenciar Funcionários</a></li>
+      <% } %>
+        
+        <li><a href="#" id="btn-sair">Sair</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- CONTEUDO PRINCIPAL -->
+  <main class="main-content">
+    <h1>Controle de Estoque</h1>
+
+    <!-- BOTAO ADICIONAR -->
+    <div class="actions">
+      <button id="btn-add-produto" class="btn-add">Adicionar Produto</button>
+    </div>
+
+    <!-- LISTA DE PRODUTOS -->
+    <div class="clientes-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Preço (R$)</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% produtos.forEach(produto => { %>
+            <tr>
+              <td><%= produto.nome %></td>
+              <td><%= produto.categoria %></td>
+              <td><%= produto.quantidade %></td>
+              <td><%= produto.preco %></td>
+              <td>
+                <button class="btn-edit"
+                        data-id="<%= produto.id %>"
+                        data-nome="<%= produto.nome %>"
+                        data-categoria="<%= produto.categoria %>"
+                        data-quantidade="<%= produto.quantidade %>"
+                        data-preco="<%= produto.preco %>">Editar</button>
+<button class="btn-delete abrir-modal" data-id="<%= produto.id %>">Deletar</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- MODAL ADICIONAR PRODUTO -->
+  <div id="modal-add-produto" class="modal">
+    <div class="modal-content">
+      <h3>Adicionar Produto</h3>
+      <form action="/estoque/adicionar" method="POST">
+        <label for="nome">Produto:</label>
+        <input type="text" name="nome" required>
+
+<label for="categoria">Categoria:</label>
+<select name="categoria" id="edit-categoria" required>
+  <% categorias.forEach(c => { %>
+    <option value="<%= c %>"><%= c %></option>
+  <% }) %>
+</select>
+
+
+
+
+        <label for="quantidade">Quantidade:</label>
+        <input type="number" name="quantidade" required>
+
+        <label for="preco">Preço:</label>
+        <input type="number" step="0.01" name="preco" required>
+
+        <div class="modal-buttons">
+          <button type="submit" class="btn-salvar">Salvar</button>
+          <button type="button" id="cancelar-add" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR PRODUTO -->
+  <div id="modal-edit-produto" class="modal">
+    <div class="modal-content">
+      <h3>Editar Produto</h3>
+      <form id="form-edit-produto" method="POST">
+        <input type="hidden" name="id" id="edit-id">
+
+        <label for="nome">Produto:</label>
+        <input type="text" name="nome" id="edit-nome" required>
+
+     <label for="categoria">Categoria:</label>
+<select name="categoria" id="edit-categoria" required>
+  <% categorias.forEach(c => { %>
+    <option value="<%= c %>"><%= c %></option>
+  <% }) %>
+</select>
+
+        <label for="quantidade">Quantidade:</label>
+        <input type="number" name="quantidade" id="edit-quantidade" required>
+
+        <label for="preco">Preço:</label>
+        <input type="number" step="0.01" name="preco" id="edit-preco" required>
+
+        <div class="modal-buttons">
+          <button type="submit" class="btn-salvar">Salvar</button>
+          <button type="button" id="cancelar-edit" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+ <!-- MODAL DE DELETAR PRODUTO -->
+<div id="modal-delete-produto" class="modal">
+  <div class="modal-content">
+    <h3>Deseja realmente deletar este produto?</h3>
+    <div class="modal-buttons">
+    <form id="form-delete-produto" method="POST" action="/estoque/deletar">
+  <input type="hidden" name="id" id="delete-id">
+<button type="submit" class="btn-delete confirmar-delete">Deletar</button>
+  <button type="button" id="cancelar-delete" class="btn-cancelar">Cancelar</button>
+</form>
+
+    </div>
+  </div>
+</div>
+
+  <!-- JS DOS MODAIS -->
+  <script>
+    // ADICIONAR
+    const btnAdd = document.getElementById('btn-add-produto');
+    const modalAdd = document.getElementById('modal-add-produto');
+    const cancelarAdd = document.getElementById('cancelar-add');
+    btnAdd.addEventListener('click', () => modalAdd.style.display = 'flex');
+    cancelarAdd.addEventListener('click', () => modalAdd.style.display = 'none');
+
+    // EDITAR
+    const editButtons = document.querySelectorAll('.btn-edit');
+    const modalEdit = document.getElementById('modal-edit-produto');
+    const cancelarEdit = document.getElementById('cancelar-edit');
+    const formEdit = document.getElementById('form-edit-produto');
+
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modalEdit.style.display = 'flex';
+        document.getElementById('edit-id').value = btn.dataset.id;
+        document.getElementById('edit-nome').value = btn.dataset.nome;
+        document.getElementById('edit-categoria').value = btn.dataset.categoria;
+        document.getElementById('edit-quantidade').value = btn.dataset.quantidade;
+        document.getElementById('edit-preco').value = btn.dataset.preco;
+        formEdit.action = `/estoque/editar/${btn.dataset.id}`;
+      });
+    });
+    cancelarEdit.addEventListener('click', () => modalEdit.style.display = 'none');
+
+    // DELETAR
+ const abrirDeleteButtons = document.querySelectorAll('.abrir-modal');
+const modalDelete = document.getElementById('modal-delete-produto');
+const formDelete = document.getElementById('form-delete-produto');
+const inputDeleteId = document.getElementById('delete-id');
+const cancelarDelete = document.getElementById('cancelar-delete');
+
+abrirDeleteButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    inputDeleteId.value = btn.dataset.id; // seta o ID certo
+    modalDelete.style.display = 'flex';
+  });
+});
+
+cancelarDelete.addEventListener('click', () => modalDelete.style.display = 'none');
+
+
+    // FECHAR CLICANDO FORA
+    window.addEventListener('click', (e) => {
+      if(e.target === modalAdd) modalAdd.style.display = 'none';
+      if(e.target === modalEdit) modalEdit.style.display = 'none';
+      if(e.target === modalDelete) modalDelete.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

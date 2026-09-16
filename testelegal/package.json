@@ -1,0 +1,58 @@
+{
+  "name": "testelegal",
+  "version": "1.0.0",
+  "description": "Aplicativo Electron DrogariaTotal",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:dir": "electron-builder --dir",
+    "build:dist": "electron-builder",
+    "build:linux": "electron-builder --linux",
+    "postinstall": "electron-builder install-app-deps",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Equipe DrogariaTotal",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "ejs-electron": "^3.0.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "mysql2": "^3.15.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "electron": "^38.1.2",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.drogariatotal.app",
+    "productName": "DrogariaTotal",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets/img"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "logoicon.ico"
+    },
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility",
+      "icon": "logoicon.ico"
+    }
+  }
+}

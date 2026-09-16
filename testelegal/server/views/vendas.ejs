@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Vendas - Drogaria Total</title>
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+  <style>
+   
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/img/logobranca.png" alt="Logo Drogaria Total">
+    </div>
+    <nav>
+      <ul>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/clientes">Clientes</a></li>
+        <li><a href="/estoque">Estoque</a></li>
+        <li><a href="/vendas" class="active">Vendas</a></li>
+            <% if (usuario && usuario.tipo === 'admin') { %>
+        <li><a href="/funcionarios">Gerenciar Funcionários</a></li>
+      <% } %>
+        <li><a href="/logout">Sair</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- CONTEUDO PRINCIPAL -->
+  <main class="main-content">
+    <h1>Histórico de Vendas</h1>
+
+    <!-- BOTÃO ADICIONAR -->
+    <div class="actions">
+      <button id="btn-add-venda" class="btn-add">Registrar Venda</button>
+    </div>
+
+    
+    <!-- LISTA DE VENDAS -->
+    <div class="clientes-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Total (R$)</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% vendas.forEach(venda => { %>
+            <tr>
+              <td><%= venda.nome_produto %></td>
+              <td><%= venda.quantidade %></td>
+              <td><%= venda.total.toFixed(2) %></td>
+<td><%= new Date(venda.data_venda).toLocaleDateString("pt-BR") %></td>
+              <td>
+                <button class="btn-delete" data-id="<%= venda.id %>">Deletar</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+ <!-- MODAL ADICIONAR VENDA -->
+<div id="modal-add-venda" class="modal">
+  <div class="modal-content">
+    <h3>Registrar Venda</h3>
+    <form action="/vendas/adicionar" method="POST">
+      
+      <label for="buscar-produto">Buscar Produto:</label>
+      <input type="text" id="buscar-produto" placeholder="Digite o nome do produto..." autocomplete="off">
+
+      <!-- lista dinamica -->
+      <ul id="lista-produtos" style="border: 1px solid #ccc; max-height: 120px; overflow-y: auto; display: none; padding: 0; margin: 0; list-style: none; border-radius: 4px;"></ul>
+
+      <!-- campo escondido com o ID do produto -->
+      <input type="hidden" name="produto_id" id="produto-id">
+
+      <label for="quantidade">Quantidade:</label>
+      <input type="number" name="quantidade" required>
+
+      <div class="modal-buttons">
+        <button type="submit" class="btn-salvar">Salvar</button>
+        <button type="button" id="cancelar-add" class="btn-cancelar">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<script>
+  const produtos = <%- JSON.stringify(produtos) %>;
+  const buscarInput = document.getElementById('buscar-produto');
+  const lista = document.getElementById('lista-produtos');
+  const produtoIdInput = document.getElementById('produto-id');
+
+  buscarInput.addEventListener('input', () => {
+    const termo = buscarInput.value.toLowerCase();
+    lista.innerHTML = ''; 
+
+    if (!termo.trim()) {
+      lista.style.display = 'none';
+      produtoIdInput.value = '';
+      return;
+    }
+
+    const filtrados = produtos.filter(p => p.nome.toLowerCase().includes(termo));
+
+    if (filtrados.length === 0) {
+      lista.style.display = 'none';
+      return;
+    }
+
+    filtrados.forEach(p => {
+      const li = document.createElement('li');
+      li.textContent = `${p.nome} (R$ ${p.preco})`;
+      li.style.padding = '6px 10px';
+      li.style.cursor = 'pointer';
+      li.addEventListener('click', () => {
+        buscarInput.value = p.nome;
+        produtoIdInput.value = p.id;
+        lista.style.display = 'none';
+      });
+      li.addEventListener('mouseenter', () => li.style.background = '#f0f0f0');
+      li.addEventListener('mouseleave', () => li.style.background = 'white');
+      lista.appendChild(li);
+    });
+
+    lista.style.display = 'block';
+  });
+
+  // esconder a lista ao clicar fora
+  document.addEventListener('click', (e) => {
+    if (!lista.contains(e.target) && e.target !== buscarInput) {
+      lista.style.display = 'none';
+    }
+  });
+</script>
+
+
+  <!-- MODAL DELETAR VENDA -->
+  <div id="modal-delete-venda" class="modal">
+    <div class="modal-content">
+      <h3>Deseja realmente deletar esta venda?</h3>
+      <form id="form-delete-venda" method="POST" action="/vendas/deletar">
+        <input type="hidden" name="id" id="delete-id">
+        <div class="modal-buttons">
+          <button type="submit" class="btn-confirm-delete">Deletar</button>
+          <button type="button" id="cancelar-delete" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // MODAL ADICIONAR
+    const btnAdd = document.getElementById('btn-add-venda');
+    const modalAdd = document.getElementById('modal-add-venda');
+    const cancelarAdd = document.getElementById('cancelar-add');
+    btnAdd.addEventListener('click', () => modalAdd.style.display = 'flex');
+    cancelarAdd.addEventListener('click', () => modalAdd.style.display = 'none');
+
+    // MODAL DELETAR
+    const deleteButtons = document.querySelectorAll('.btn-delete');
+    const modalDelete = document.getElementById('modal-delete-venda');
+    const inputDeleteId = document.getElementById('delete-id');
+    const cancelarDelete = document.getElementById('cancelar-delete');
+
+    deleteButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = btn.getAttribute('data-id');
+        inputDeleteId.value = id;
+        modalDelete.style.display = 'flex';
+      });
+    });
+
+    cancelarDelete.addEventListener('click', () => modalDelete.style.display = 'none');
+
+    window.addEventListener('click', (e) => {
+      if (e.target === modalDelete) modalDelete.style.display = 'none';
+    });
+  </script>
+
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Carregando...</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: background 1s ease;
+    }
+
+    .logo {
+      width: 300px;
+      opacity: 0;
+      animation: fadeInOut 4s ease forwards;
+    }
+
+    @keyframes fadeInOut {
+      0%   { opacity: 0; transform: scale(0.9); }
+      20%  { opacity: 1; transform: scale(1); }
+      70%  { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.1); }
+    }
+
+    .fade-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+    }
+
+    .fade-in {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <img src="/assets/img/logobranca.png" alt="Logo" class="logo">
+  <div class="fade-overlay" id="fade"></div>
+
+  <script>
+    // aguarda a animacao do logo e depois inicia o fade para o login
+    setTimeout(() => {
+      const fade = document.getElementById('fade');
+      fade.classList.add('fade-in');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
+    }, 4200); // 4.2s de exibicao antes de redirecionar
+  </script>
+</body>
+</html>

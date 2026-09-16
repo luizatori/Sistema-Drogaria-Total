@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Clientes - Drogaria Total</title>
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/img/logobranca.png" alt="Logo Drogaria Total">
+    </div>
+    <nav>
+      <ul>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/clientes" class="active">Clientes</a></li>
+        <li><a href="/estoque">Estoque</a></li>
+        <li><a href="/vendas">Vendas</a></li>
+          <% if (usuario && usuario.tipo === 'admin') { %>
+        <li><a href="/funcionarios">Gerenciar Funcionários</a></li>
+      <% } %>
+        
+        <li><a href="#" id="btn-sair">Sair</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- CONTEUDO PRINCIPAL -->
+  <main class="main-content">
+    <h1>Lista de Clientes</h1>
+
+    <!-- BOTAO ADICIONAR -->
+    <div class="actions">
+      <button id="btn-add-cliente" class="btn-add">Adicionar Cliente</button>
+    </div>
+
+    <!-- LISTA DE CLIENTES -->
+    <div class="clientes-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+     <tbody>
+  <% clientes.forEach(cliente => { %>
+    <tr>
+      <td><%= cliente.nome %></td>
+      <td><%= cliente.email %></td>
+      <td><%= cliente.telefone %></td>
+      <td>
+        <button class="btn-edit" 
+                data-id="<%= cliente.id %>" 
+                data-nome="<%= cliente.nome %>" 
+                data-email="<%= cliente.email %>" 
+                data-telefone="<%= cliente.telefone %>">Editar</button>
+        <button class="btn-delete" data-id="<%= cliente.id %>">Deletar</button>
+      </td>
+    </tr>
+  <% }) %>
+</tbody>
+
+      </table>
+    </div>
+  </main>
+
+  <!-- MODAL ADICIONAR CLIENTE -->
+  <div id="modal-add-cliente" class="modal">
+    <div class="modal-content">
+      <h3>Adicionar Cliente</h3>
+      <form action="/clientes/adicionar" method="POST">
+        <label for="nome">Nome:</label>
+        <input type="text" name="nome" required>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" required>
+
+        <label for="telefone">Telefone:</label>
+        <input type="text" name="telefone" required>
+
+        <div class="modal-buttons">
+          <button type="submit" class="btn-salvar">Salvar</button>
+          <button type="button" id="cancelar-add" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR CLIENTE -->
+  <div id="modal-edit-cliente" class="modal">
+    <div class="modal-content">
+      <h3>Editar Cliente</h3>
+      <form id="form-edit-cliente" method="POST">
+        <input type="hidden" name="id" id="edit-id">
+
+        <label for="nome">Nome:</label>
+        <input type="text" name="nome" id="edit-nome" required>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="edit-email" required>
+
+        <label for="telefone">Telefone:</label>
+        <input type="text" name="telefone" id="edit-telefone" required>
+
+        <div class="modal-buttons">
+          <button type="submit" class="btn-salvar">Salvar</button>
+          <button type="button" id="cancelar-edit" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<!-- MODAL DE DELETAR CLIENTE -->
+
+<div id="modal-delete-cliente" class="modal">
+  <div class="modal-content">
+    <h3>Deseja realmente deletar este cliente?</h3>
+    <div class="modal-buttons">
+      <form id="form-delete-cliente" method="POST">
+        <button type="submit" class="btn-delete">Deletar</button>
+        <button type="button" id="cancelar-delete" class="btn-cancelar">Cancelar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+  <!-- JS DOS MODAIS -->
+  <script>
+    // ADICIONAR CLIENTE
+    const btnAdd = document.getElementById('btn-add-cliente');
+    const modalAdd = document.getElementById('modal-add-cliente');
+    const cancelarAdd = document.getElementById('cancelar-add');
+
+    btnAdd.addEventListener('click', () => modalAdd.style.display = 'flex');
+    cancelarAdd.addEventListener('click', () => modalAdd.style.display = 'none');
+    window.addEventListener('click', (e) => { if(e.target === modalAdd) modalAdd.style.display = 'none'; });
+
+    // EDITAR CLIENTE
+    const editButtons = document.querySelectorAll('.btn-edit');
+    const modalEdit = document.getElementById('modal-edit-cliente');
+    const cancelarEdit = document.getElementById('cancelar-edit');
+    const formEdit = document.getElementById('form-edit-cliente');
+
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modalEdit.style.display = 'flex';
+        document.getElementById('edit-id').value = btn.dataset.id;
+        document.getElementById('edit-nome').value = btn.dataset.nome;
+        document.getElementById('edit-email').value = btn.dataset.email;
+        document.getElementById('edit-telefone').value = btn.dataset.telefone;
+        formEdit.action = `/clientes/editar/${btn.dataset.id}`;
+      });
+    });
+    cancelarEdit.addEventListener('click', () => modalEdit.style.display = 'none');
+
+    // DELETAR CLIENTE
+const deleteButtons = document.querySelectorAll('.clientes-list .btn-delete'); // apenas os da tabela
+const modalDelete = document.getElementById('modal-delete-cliente');
+const cancelarDelete = document.getElementById('cancelar-delete');
+const formDelete = document.getElementById('form-delete-cliente');
+
+deleteButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    modalDelete.style.display = 'flex';
+    console.log('ID do cliente a deletar:', btn.dataset.id); // debug
+    formDelete.setAttribute('action', `/clientes/deletar/${btn.dataset.id}`);
+  });
+});
+
+cancelarDelete.addEventListener('click', () => modalDelete.style.display = 'none');
+
+window.addEventListener('click', (e) => {
+  if(e.target === modalDelete) modalDelete.style.display = 'none';
+});
+
+cancelarDelete.addEventListener('click', () => modalDelete.style.display = 'none');
+
+// fechar ao clicar fora
+window.addEventListener('click', (e) => {
+  if(e.target === modalDelete) modalDelete.style.display = 'none';
+});
+
+
+    // FECHAR MODAIS AO CLICAR FORA
+    window.addEventListener('click', (e) => {
+      if(e.target === modalEdit) modalEdit.style.display = 'none';
+      if(e.target === modalDelete) modalDelete.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

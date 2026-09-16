@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Drogaria Total</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+
+    /* animacao de entrada do fundo e do conteudo */
+    body {
+      background-color: #f5f6fa; 
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    body.bg-loaded {
+      opacity: 1;
+    }
+
+    .login-container {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .login-container.content-loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+ 
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <img src="../assets/img/logo.png" alt="Logo Drogaria Total" class="logo">
+
+    <form method="POST" action="/login">
+      <div class="form-group">
+        <label for="nome">Usuário</label>
+        <input type="text" id="nome" name="nome" placeholder="Digite seu nome" required>
+      </div>
+
+      <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+      </div>
+
+      <button type="submit">Entrar</button>
+      <button type="button" class="cadastro-btn" id="abrirCadastro">Cadastrar</button>
+
+      <% if (erro) { %>
+        <p style="color:red; margin-top:10px;"><%= erro %></p>
+      <% } %>
+    </form>
+
+    <p class="footer-text">© 2025 Drogaria Total - Sistema Corporativo</p>
+  </div>
+
+  <!-- SIDEBAR DE CADASTRO -->
+<div class="sidebar" id="sidebarCadastro">
+  <span class="close-btn" id="fecharSidebar">&times;</span>
+  <h3>Novo Cadastro</h3>
+
+  <!-- form de cadastro -->
+<form method="POST" action="/cadastro" id="cadastroForm">
+  <div class="form-group">
+    <label for="nomeCadastro">Nome</label>
+    <input type="text" id="nomeCadastro" name="nome" placeholder="Escolha um nome" required>
+
+    <label for="senhaCadastro">Senha</label>
+    <input type="password" id="senhaCadastro" name="senha" placeholder="Crie uma senha" required>
+
+    <label for="confirmarSenhaCadastro">Confirmar Senha</label>
+    <input type="password" id="confirmarSenhaCadastro" name="confirmarSenha" placeholder="Repita a senha" required>
+  </div>
+
+  <button type="submit">Registrar</button>
+</form>
+
+  <div class="logo-container">
+    <img src="/assets/img/logo.png" alt="Logo Drogaria Total" class="logo-grande">
+    <div class="balao-fala">Crie seu usuário para gerenciar nossa farmácia com eficiência e praticidade!</div>
+  </div>
+</div>
+
+  <script>
+    //  fade-in suave ao carregar
+    window.addEventListener('load', () => {
+      document.body.classList.add('bg-loaded');
+
+      setTimeout(() => {
+        document.querySelector('.login-container').classList.add('content-loaded');
+      }, 600);
+    });
+
+    const form = document.getElementById('loginForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const senha = document.getElementById('senha').value;
+
+      const user = await window.api.login({ nome, senha });
+
+      if (user) {
+        alert(`Bem-vindo, ${user.nome}!`);
+        window.location.href = "dashboard.ejs";
+      } else {
+        alert('Credenciais inválidas!');
+      }
+    });
+    
+  </script>
+
+  <script>
+    const sidebar = document.getElementById('sidebarCadastro');
+    const abrir = document.getElementById('abrirCadastro');
+    const fechar = document.getElementById('fecharSidebar');
+
+    abrir.addEventListener('click', () => sidebar.classList.add('active'));
+    fechar.addEventListener('click', () => sidebar.classList.remove('active'));
+  </script>
+
+<script>
+const form = document.getElementById('cadastroForm');
+const senha = document.getElementById('senhaCadastro');
+const confirmar = document.getElementById('confirmarSenhaCadastro');
+
+const erroMsg = document.createElement('p');
+erroMsg.style.color = 'red';
+erroMsg.style.textAlign = 'center';
+erroMsg.style.display = 'none';
+erroMsg.style.marginTop = '-4px';
+form.appendChild(erroMsg);
+
+form.addEventListener('submit', (e) => {
+  if (senha.value.trim() !== confirmar.value.trim()) {
+    e.preventDefault();
+    erroMsg.textContent = 'As senhas não coincidem. Tente novamente.';
+    erroMsg.style.display = 'block';
+  } else {
+    erroMsg.style.display = 'none';
+  }
+});
+
+</script>
+
+
+</body>
+</html>

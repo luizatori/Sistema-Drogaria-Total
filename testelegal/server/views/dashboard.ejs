@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Drogaria Total</title>
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/img/logobranca.png" alt="Logo Drogaria Total">
+    </div>
+    <nav>
+      <ul>
+        <li><a href="/clientes">Clientes</a></li>
+        <li><a href="/estoque">Estoque</a></li>
+        <li><a href="/vendas">Vendas</a></li>
+        <% if (usuario && usuario.tipo === 'admin') { %>
+  <li><a href="/funcionarios"> Gerenciar Funcionários</a></li>
+<% } %>
+        <li><a href="#" id="btn-sair">Sair</a></li>
+
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- CONTEUDO PRINCIPAL -->
+  <main class="main-content">
+    <h1>Dashboard Corporativo</h1>
+    <div class="cards-grid">
+      <!-- 4 CARDS DE GRAFICOS -->
+      <div class="card"> <h1>Rendimento mensal</h1> <canvas id="grafico1"></canvas></div>
+      <div class="card"><h1>Vendas mensais</h1><canvas id="grafico2"></canvas></div>
+      <div class="card"><h1>Estoque por categorias</h1><canvas id="grafico3"></canvas></div>
+      <div class="card"><h1>Rendimento semanal</h1><canvas id="grafico4"></canvas></div>
+
+      <!-- CARD 5 QUEMSOMOS 
+<div class="card" id="card-quemsomos">
+  <img src="assets/img/quemsomos.gif" alt="Quem Somos" class="gif-card" width="70%" >
+</div> -->
+
+    </div>
+
+    <!-- CARD POLAROID ( E MULTIDROGUITOS ) -->
+  <div class="mascote-container">
+  <img src="/assets/img/multidroguitos.png" alt="Mascote Multidroquitos" class="mascote">
+<div class="polaroid">
+<h2>Bem-vindo, <%= usuario.nome %>!</h2>
+  <p>Aqui você acessa as funcionalidades principais:  
+  - Gestão de Clientes  
+  - Controle de Estoque  
+  - Histórico de Vendas  
+  - Rendimento detalhado</p>
+</div>
+
+
+<!-- ALERTA: produtos com estoque baixo (card) -->
+<div class="alert-card">
+  <div class="alert-header">
+    <h3>Produtos com estoque baixo </h3>
+    <% if (alertasCount && alertasCount > 0) { %>
+      <span class="alert-badge"><%= alertasCount %></span>
+    <% } %>
+  </div>
+
+  <% if (alertasCount === 0) { %>
+    <p class="alert-ok"> Nenhum produto abaixo do limite</p>
+  <% } else { %>
+    <ul class="alert-list">
+      <% alertasList.forEach(item => { %>
+        <li class="alert-item">
+          <strong><%= item.nome %></strong>
+          <span class="alert-small">restam <%= item.quantidade %> (mínimo <%= item.quantidade_minima %>)</span>
+        </li>
+      <% }) %>
+    </ul>
+    <p style="margin-top:.6rem">
+      <a href="/estoque" class="link-estoque">Ver estoque completo</a>
+    </p>
+  <% } %>
+</div>
+
+
+  </main>
+  
+
+<script>
+  // CARD 1 - BARRAS
+  const ctx1 = document.getElementById('grafico1');
+  new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: <%- JSON.stringify(meses) %>, // meses vindos do MySQL
+      datasets: [{
+        label: 'Rendimento',
+        data: <%- JSON.stringify(totaisVendas) %>, // valores do banco
+        backgroundColor: '#426696'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+// CARD 2 - LINHA (dados reais do banco)
+const ctx2 = document.getElementById('grafico2');
+new Chart(ctx2, {
+  type: 'line',
+  data: {
+    labels: <%- JSON.stringify(meses) %>, // nomes dos meses
+    datasets: [{
+      label: 'Vendas',
+      data: <%- JSON.stringify(totaisVendas) %>, // totais R$
+      borderColor: '#426696',
+      backgroundColor: 'rgba(66,105,150,0.2)',
+      tension: 0.4,
+      fill: true
+    }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } } }
+  ,
+        animations: {
+        tension: {
+          duration: 3000,
+          easing: 'Static',
+          from: 0,
+          to: 1,
+          loop: true
+      }
+    }
+});
+
+
+
+  // CARD 3 - PIZZA
+const ctx3 = document.getElementById('grafico3');
+
+const categorias = <%- JSON.stringify(categorias) %>;
+const totais = <%- JSON.stringify(totais) %>;
+
+new Chart(ctx3, {
+  type: 'pie',
+  data: {
+    labels: categorias, // categorias vindas do MySQL
+    datasets: [{
+      data: totais, // valores reais
+      backgroundColor: ['#426696', '#6687b3', '#071f42', '#a0b2d8'],
+      borderColor: '#fff',
+      borderWidth: 2
+    }]
+  },
+
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#000',
+            font: { size: 14 }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.label + ': ' + context.raw + ' unidades';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // CARD 4 - AREA (LINHA PREENCHIDA)
+  const ctx4 = document.getElementById('grafico4');
+  new Chart(ctx4, {
+    type: 'line',
+    data: {
+      labels: <%- JSON.stringify(semanas) %>, 
+      datasets: [{
+        label: 'Rendimento Semanal',
+        data: <%- JSON.stringify(totaisSemanais) %>, // valores vindos do banco
+        borderColor: '#426696',
+        backgroundColor: 'rgba(66,105,150,0.3)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      animations: {
+        tension: {
+          duration: 3000,
+          easing: 'Static',
+          from: 0,
+          to: 1,
+          loop: true
+        }
+      }
+    }
+  });
+
+  
+</script>
+
+
+<!-- modal de confirmaçao -->
+<div id="modal-sair" class="modal">
+  <div class="modal-content">
+    <h3>Você deseja mesmo sair?</h3>
+    <div class="modal-buttons">
+      <button id="confirmar-sair">Sim</button>
+      <button id="cancelar-sair">Não</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  const btnSair = document.getElementById('btn-sair');
+  const modal = document.getElementById('modal-sair');
+  const btnConfirmar = document.getElementById('confirmar-sair');
+  const btnCancelar = document.getElementById('cancelar-sair');
+
+  // abrir modal
+  btnSair.addEventListener('click', (e) => {
+    e.preventDefault();
+    modal.style.display = 'flex';
+  });
+
+  // confirmar logout
+  btnConfirmar.addEventListener('click', () => {
+    window.location.href = '/logout';
+  });
+
+  // cancelar logout
+  btnCancelar.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  // fechar modal clicando fora do conteudo
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

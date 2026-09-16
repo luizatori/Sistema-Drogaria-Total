@@ -1,0 +1,5 @@
+#  ignorar arquivos sensiveis ao upar num repositorio do github (informacoes do bancao de dados)
+server/.env
+.env
+node_modules/
+

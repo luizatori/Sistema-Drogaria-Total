@@ -1,0 +1,278 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #6687b3, #071f42);
+}
+
+.login-container {
+  background: #fff;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+/* LOGO */
+.logo {
+  width: 200px;
+  margin-bottom: 1.5rem;
+}
+
+/* INPUTS E BOTOES LEGAIS  */
+.form-group {
+  margin-bottom: 1.2rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #071f42;
+  box-shadow: 0 0 5px rgba(47, 58, 124, 0.5);
+}
+
+button {
+  width: 100%;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  background: #426696;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #071f42;
+}
+
+.footer-text {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 2rem 1.5rem;
+  }
+  .logo {
+    width: 120px;
+  }
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(180deg, #2b4470, #112849);
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-container {
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  width: 400px;
+  position: relative;
+}
+
+.login-container h3 {
+  text-align: center;
+  color: #2b4470;
+  margin-bottom: 1.5rem;
+}
+
+form label {
+  font-weight: 600;
+  color: #2b4470;
+  display: block;
+  margin-bottom: 4px;
+}
+
+form input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+  transition: border 0.3s;
+}
+
+form input:focus {
+  border-color: #2b4470;
+  outline: none;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #426696;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #325179;
+}
+
+.logo-container {
+  position: relative;
+  margin-top: 50px;
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  flex-direction: column;
+  animation: fadeIn 1s ease forwards; }
+
+.logo-grande {
+  width: 500px; 
+  max-width: 90%; 
+  margin-bottom: 20px;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3)); 
+  transition: transform 0.4s ease;
+  transform: scale(1); 
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.logo-grande.animate {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.logo-container:hover .logo-grande {
+  transform: scale(1.05);
+}
+
+.balao-fala {
+  display: inline-block;
+  position: relative;
+  background: #426696;
+  color: #fff;
+  padding: 16px 20px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 500;
+  width: 80%;
+  max-width: 300px;
+  animation: flutuar 3s ease-in-out infinite;
+  opacity: 1; 
+  transition: none;
+}
+
+
+@keyframes flutuar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+   .sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px; 
+  width: 360px;
+  height: 100%;
+  padding: 2.5rem 2rem;
+  background: #fff; 
+  box-shadow: -8px 0 25px rgba(0,0,0,0.15);
+  border-radius: 16px 0 0 16px;
+  transition: right 0.5s ease;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  color: #071f42;
+  overflow-y: auto;
+}
+
+    .sidebar.active {
+      right: 0;
+    }
+
+    .sidebar h3 {
+      margin-bottom: 1rem;
+      color: #071f42;
+      text-align: center;
+    }
+
+    .sidebar .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 1.5rem;
+      color: #071f42;
+      cursor: pointer;
+    }
+
+    .cadastro-btn {
+      margin-top: 0.8rem;
+      background: #426696;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      padding: 0.8rem;
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .cadastro-btn:hover {
+      background: #071f42;
+    }
+
